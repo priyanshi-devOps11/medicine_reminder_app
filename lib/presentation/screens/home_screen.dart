@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../providers/medicine_provider.dart';
 import '../widgets/medicine_card.dart';
 import '../widgets/empty_state.dart';
 import 'add_medicine_screen.dart';
 
 class HomeScreen extends ConsumerWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -22,47 +23,66 @@ class HomeScreen extends ConsumerWidget {
           ),
         ],
       ),
+
       body: medicinesAsync.when(
+        /// ---------------- DATA ----------------
         data: (medicines) {
+          // Defensive: ensure non-null list
           if (medicines.isEmpty) {
             return const EmptyState();
           }
+
+          // Sort medicines by time (earlier first)
+          medicines.sort(
+                (a, b) => a.time.compareTo(b.time),
+          );
 
           return ListView.builder(
             padding: const EdgeInsets.symmetric(vertical: 8),
             itemCount: medicines.length,
             itemBuilder: (context, index) {
               final medicine = medicines[index];
+
               return MedicineCard(
                 medicine: medicine,
                 onDelete: () async {
                   final actions = ref.read(medicineActionsProvider);
                   await actions.deleteMedicine(medicine);
 
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('${medicine.name} deleted'),
-                        backgroundColor: Colors.red[700],
-                      ),
-                    );
-                  }
+                  if (!context.mounted) return;
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('${medicine.name} deleted'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
                 },
               );
             },
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(
-          child: Text('Error: $error'),
+
+        /// ---------------- LOADING ----------------
+        loading: () => const Center(
+          child: CircularProgressIndicator(),
+        ),
+
+        /// ---------------- ERROR ----------------
+        error: (_, __) => const Center(
+          child: Text(
+            'Something went wrong.\nPlease restart the app.',
+            textAlign: TextAlign.center,
+          ),
         ),
       ),
+
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => const AddMedicineScreen(),
+              builder: (_) => const AddMedicineScreen(),
             ),
           );
         },
@@ -72,10 +92,11 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
+  /// ---------------- ABOUT DIALOG ----------------
   void _showAboutDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (_) => AlertDialog(
         title: const Text('About'),
         content: const Text(
           'Medicine Reminder App\n\n'
