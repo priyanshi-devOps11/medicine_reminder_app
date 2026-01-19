@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
+/// Widget displayed when no medicines are added
 class EmptyState extends StatelessWidget {
-  const EmptyState({Key? key}) : super(key: key);
+  const EmptyState({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -19,15 +20,19 @@ class EmptyState extends StatelessWidget {
             'No medicines added yet',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
               color: Colors.grey[600],
+              fontWeight: FontWeight.w600,
             ),
           ),
           const SizedBox(height: 8),
-          Text(
-            'Tap the + button to add your first medicine',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Colors.grey[500],
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: Text(
+              'Tap the + button below to add your first medicine reminder',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Colors.grey[500],
+              ),
+              textAlign: TextAlign.center,
             ),
-            textAlign: TextAlign.center,
           ),
         ],
       ),

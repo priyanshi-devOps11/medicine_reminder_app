@@ -4,6 +4,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
 
+/// Service for managing medicine reminder notifications
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
   factory NotificationService() => _instance;
@@ -12,103 +13,200 @@ class NotificationService {
   final FlutterLocalNotificationsPlugin _notifications =
   FlutterLocalNotificationsPlugin();
 
-  /// Initialize notifications
+  bool _isInitialized = false;
+
+  /// Initialize the notification service
   Future<void> init() async {
-    // Initialize timezone
-    tz.initializeTimeZones();
+    if (_isInitialized) {
+      print('✅ Notification service already initialized');
+      return;
+    }
 
-    // Android initialization
-    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+    try {
+      print('🔔 Initializing notification service...');
 
-    const initSettings = InitializationSettings(
-      android: androidSettings,
-    );
+      // Initialize timezone database
+      tz.initializeTimeZones();
+      final location = tz.getLocation('Asia/Kolkata'); // Set your timezone
+      tz.setLocalLocation(location);
+      print('✅ Timezone initialized: ${tz.local.name}');
 
-    await _notifications.initialize(
-      initSettings,
-      onDidReceiveNotificationResponse: _onNotificationTapped,
-    );
+      // Android-specific initialization
+      const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
 
-    // Request permissions
-    await _requestPermissions();
+      const initSettings = InitializationSettings(
+        android: androidSettings,
+      );
+
+      final initialized = await _notifications.initialize(
+        initSettings,
+        onDidReceiveNotificationResponse: _onNotificationTapped,
+      );
+
+      print('✅ Notifications initialized: $initialized');
+
+      // Request required permissions
+      await _requestPermissions();
+
+      _isInitialized = true;
+      print('✅ Notification service ready!');
+    } catch (e) {
+      print('❌ Error initializing notifications: $e');
+      rethrow;
+    }
   }
 
-  /// Request notification permissions (Android 13+)
+  /// Request notification and alarm permissions
   Future<void> _requestPermissions() async {
-    if (await Permission.notification.isDenied) {
-      await Permission.notification.request();
-    }
+    print('📱 Requesting permissions...');
 
-    // For exact alarms (Android 12+)
-    if (await Permission.scheduleExactAlarm.isDenied) {
-      await Permission.scheduleExactAlarm.request();
+    // Request notification permission (Android 13+)
+    final notificationStatus = await Permission.notification.request();
+    print('📱 Notification permission: $notificationStatus');
+
+    // Request exact alarm permission (Android 12+)
+    final alarmStatus = await Permission.scheduleExactAlarm.request();
+    print('⏰ Exact alarm permission: $alarmStatus');
+
+    if (notificationStatus.isDenied || alarmStatus.isDenied) {
+      print('⚠️ Warning: Some permissions were denied');
     }
   }
 
-  /// Handle notification tap
+  /// Handle notification tap events
   void _onNotificationTapped(NotificationResponse response) {
-    // Handle navigation or actions when notification is tapped
-    print('Notification tapped: ${response.payload}');
+    print('🔔 Notification tapped: ${response.payload}');
   }
 
-  /// Schedule a medicine reminder
+  /// Schedule a daily medicine reminder at the specified time
   Future<void> scheduleMedicineReminder({
     required int id,
     required String medicineName,
     required String dose,
     required DateTime scheduledTime,
   }) async {
-    // Convert to TZDateTime for today at the specified time
-    final now = DateTime.now();
-    var scheduledDate = DateTime(
-      now.year,
-      now.month,
-      now.day,
-      scheduledTime.hour,
-      scheduledTime.minute,
-    );
+    try {
+      print('📅 Scheduling notification for: $medicineName at ${scheduledTime.hour}:${scheduledTime.minute}');
 
-    // If the time has passed today, schedule for tomorrow
-    if (scheduledDate.isBefore(now)) {
-      scheduledDate = scheduledDate.add(const Duration(days: 1));
+      final now = tz.TZDateTime.now(tz.local);
+
+      // Create scheduled date for today at the specified time
+      var scheduledDate = tz.TZDateTime(
+        tz.local,
+        now.year,
+        now.month,
+        now.day,
+        scheduledTime.hour,
+        scheduledTime.minute,
+      );
+
+      // If time has passed today, schedule for tomorrow
+      if (scheduledDate.isBefore(now)) {
+        scheduledDate = scheduledDate.add(const Duration(days: 1));
+        print('⏰ Time has passed today, scheduling for tomorrow');
+      }
+
+      print('🕐 Scheduled for: $scheduledDate');
+
+      // Configure Android notification details
+      final androidDetails = AndroidNotificationDetails(
+        'medicine_reminder_channel',
+        'Medicine Reminders',
+        channelDescription: 'Daily reminders for taking medicines',
+        importance: Importance.high,
+        priority: Priority.high,
+        icon: '@mipmap/ic_launcher',
+        color: const Color(0xFF009688),
+        playSound: true,
+        enableVibration: true,
+        enableLights: true,
+        ledColor: const Color(0xFF009688),
+        ledOnMs: 1000,
+        ledOffMs: 500,
+      );
+
+      final notificationDetails = NotificationDetails(android: androidDetails);
+
+      // Schedule the notification
+      await _notifications.zonedSchedule(
+        id,
+        '💊 Time for your medicine!',
+        '$medicineName - $dose',
+        scheduledDate,
+        notificationDetails,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+        UILocalNotificationDateInterpretation.absoluteTime,
+        matchDateTimeComponents: DateTimeComponents.time, // Repeat daily
+      );
+
+      print('✅ Notification scheduled successfully for ID: $id');
+
+      // Verify scheduled notification
+      final pendingNotifications = await _notifications.pendingNotificationRequests();
+      print('📋 Total pending notifications: ${pendingNotifications.length}');
+    } catch (e) {
+      print('❌ Error scheduling notification: $e');
+      rethrow;
     }
-
-    final tzScheduledDate = tz.TZDateTime.from(scheduledDate, tz.local);
-
-    const androidDetails = AndroidNotificationDetails(
-      'medicine_reminder_channel',
-      'Medicine Reminders',
-      channelDescription: 'Notifications for medicine reminders',
-      importance: Importance.high,
-      priority: Priority.high,
-      icon: '@mipmap/ic_launcher',
-      color: Color(0xFF009688), // Teal
-      playSound: true,
-      enableVibration: true,
-    );
-
-    const notificationDetails = NotificationDetails(android: androidDetails);
-
-    await _notifications.zonedSchedule(
-      id,
-      '💊 Time for your medicine!',
-      '$medicineName - $dose',
-      tzScheduledDate,
-      notificationDetails,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-      UILocalNotificationDateInterpretation.absoluteTime,
-      matchDateTimeComponents: DateTimeComponents.time, // Repeat daily
-    );
   }
 
-  /// Cancel a scheduled notification
+  /// Show an immediate test notification
+  Future<void> showTestNotification({
+    required String medicineName,
+    required String dose,
+  }) async {
+    try {
+      const androidDetails = AndroidNotificationDetails(
+        'medicine_reminder_channel',
+        'Medicine Reminders',
+        channelDescription: 'Daily reminders for taking medicines',
+        importance: Importance.high,
+        priority: Priority.high,
+        icon: '@mipmap/ic_launcher',
+        color: Color(0xFF009688),
+      );
+
+      const notificationDetails = NotificationDetails(android: androidDetails);
+
+      await _notifications.show(
+        DateTime.now().millisecond,
+        '💊 Medicine Reminder Added!',
+        '$medicineName - $dose will remind you daily',
+        notificationDetails,
+      );
+
+      print('✅ Test notification shown');
+    } catch (e) {
+      print('❌ Error showing test notification: $e');
+    }
+  }
+
+  /// Cancel a specific notification by ID
   Future<void> cancelNotification(int id) async {
-    await _notifications.cancel(id);
+    try {
+      await _notifications.cancel(id);
+      print('✅ Cancelled notification: $id');
+    } catch (e) {
+      print('❌ Error cancelling notification: $e');
+    }
   }
 
-  /// Cancel all notifications
+  /// Cancel all scheduled notifications
   Future<void> cancelAllNotifications() async {
-    await _notifications.cancelAll();
+    try {
+      await _notifications.cancelAll();
+      print('✅ All notifications cancelled');
+    } catch (e) {
+      print('❌ Error cancelling all notifications: $e');
+    }
   }
+
+  /// Get all pending notifications (for debugging)
+  Future<List<PendingNotificationRequest>> getPendingNotifications() async {
+    return await _notifications.pendingNotificationRequests();
+  }
+
+  /// Check if service is initialized
+  bool get isInitialized => _isInitialized;
 }

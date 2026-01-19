@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'core/theme/app_theme.dart';
 import 'presentation/screens/home_screen.dart';
 
+/// Root widget of the Medicine Reminder application
 class MedicineReminderApp extends StatelessWidget {
-  const MedicineReminderApp({Key? key}) : super(key: key);
+  const MedicineReminderApp({super.key});
 
   @override
   Widget build(BuildContext context) {
