@@ -91,7 +91,7 @@ class NotificationService {
       final now = tz.TZDateTime.now(tz.local);
 
       // Create scheduled date for today at the specified time
-      var scheduledDate = tz.TZDateTime(
+      tz.TZDateTime scheduledDate = tz.TZDateTime(
         tz.local,
         now.year,
         now.month,
@@ -100,11 +100,10 @@ class NotificationService {
         scheduledTime.minute,
       );
 
-      // If time has passed today, schedule for tomorrow
       if (scheduledDate.isBefore(now)) {
         scheduledDate = scheduledDate.add(const Duration(days: 1));
-        print('⏰ Time has passed today, scheduling for tomorrow');
       }
+
 
       print('🕐 Scheduled for: $scheduledDate');
 
