@@ -1,4 +1,4 @@
-# Medicine Reminder App <br>
+# Medicine Reminder App
 
 A Flutter-based mobile application designed to help users manage their daily medication schedule through timely notifications and an intuitive interface.
 
@@ -9,12 +9,31 @@ Medicine Reminder is a fully offline Android application that enables users to s
 ## Key Features
 
 - **Medicine Management**: Add, view, and delete medicines with customizable names, dosages, and reminder times
+- **Custom Scheduling**: Support for daily reminders or specific days of the week
+- **Date Range Support**: Set start dates and optional end dates for medication courses
 - **Daily Notifications**: Automatic recurring notifications at user-specified times
 - **Notification History**: Track past medication reminders with a persistent local history
+- **Notes Feature**: Add optional notes for each medicine (e.g., "Take after dinner")
 - **Timezone-Aware Scheduling**: Intelligent scheduling that adapts to device timezone
 - **Permission Handling**: Seamless integration with Android 12+ exact alarm permissions and Android 13+ notification permissions
 - **Offline-First**: All data stored locally with no internet connection required
 - **Background Reliability**: Notifications work even when the app is closed or device is locked
+
+## Screenshots
+
+### Add Medicine Screen
+<img src="screenshots/ss3.jpg" width="300" alt="Add Medicine - Top Section">
+
+*Add medicine with name, dose, time, and date range*
+
+<img src="screenshots/ss1.jpg" width="300" alt="Add Medicine - Frequency Selection">
+
+*Select frequency (Daily or Specific Days) and choose days of the week*
+
+### Home Screen
+<img src="screenshots/ss2.jpg" width="300" alt="Medicine List">
+
+*View all scheduled medicines with their details*
 
 ## Tech Stack
 
@@ -63,10 +82,6 @@ lib/
 2. **Provider-Based State**: Riverpod providers manage app state reactively, ensuring UI updates automatically when data changes
 3. **Service Layer**: Notification logic encapsulated in a dedicated service for maintainability
 4. **Type-Safe Models**: Hive type adapters ensure compile-time safety for database operations
-
-## Screenshots
-
-*Screenshots showcasing the app interface will be added here*
 
 ## Getting Started
 
@@ -135,17 +150,16 @@ The application has been tested on:
 ## Known Limitations
 
 - Currently supports Android only (iOS support planned for future release)
-- Notifications are daily recurring only (weekly/monthly schedules not yet supported)
 - No medication adherence analytics or reports
 - Single user support (no multi-profile functionality)
 
 ## Future Enhancements
 
-- Multi-day medication courses with automatic end dates
 - Medication adherence statistics and insights
 - Custom notification sounds
 - Integration with health platforms
 - iOS support
+- Multi-user support with profiles
 
 ## Learning Outcomes
 
@@ -170,4 +184,5 @@ For questions or feedback, please reach out via [LinkedIn](https://www.linkedin.
 ---
 
 **Built with Flutter** 💙
-# medicine_reminder_app
+```
+
