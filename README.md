@@ -177,7 +177,7 @@ This project demonstrates proficiency in:
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Contact
+## Contact:
 
 For questions or feedback, please reach out via [LinkedIn](https://www.linkedin.com/in/priyanshi-srivastava8119/) or [Email](mailto:srivastavapriyanshi8081@gmail.com).
 
@@ -185,6 +185,7 @@ For questions or feedback, please reach out via [LinkedIn](https://www.linkedin.
 
 **Built with Flutter** 💙
 ```
+
 
 
 
