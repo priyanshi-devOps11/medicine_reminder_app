@@ -6,7 +6,7 @@ macos/** linguist-vendored
 windows/** linguist-vendored
 web/** linguist-vendored
 
-# Ignore build & generated files
+
 build/** linguist-vendored
 .dart_tool/** linguist-vendored
 .packages linguist-vendored
