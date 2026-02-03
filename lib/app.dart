@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'core/theme/app_theme.dart';
 import 'presentation/screens/home_screen.dart';
 
-/// Root widget of the Medicine Reminder application
+
 class MedicineReminderApp extends StatelessWidget {
   const MedicineReminderApp({super.key});
 
