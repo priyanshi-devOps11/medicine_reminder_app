@@ -95,6 +95,7 @@ lib/
 ### Installation
 
 1. **Clone the repository**
+
 ```bash
    git clone https://github.com/yourusername/medicine-reminder-app.git
    cd medicine-reminder-app
@@ -185,6 +186,7 @@ For questions or feedback, please reach out via [LinkedIn](https://www.linkedin.
 
 **Built with Flutter** 💙
 ```
+
 
 
 
