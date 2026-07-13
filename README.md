@@ -4,7 +4,7 @@ A Flutter-based mobile application designed to help users manage their daily med
 
 ## Overview
 
-Medicine Reminder is a fully offline Android application that enables users to schedule and track their daily medicines. The app leverages Android's native notification system to deliver reliable reminders, ensuring users never miss their medication schedule.
+Medicine Reminder is a fully offline Android application that enables users to schedule and track their daily medicines. The app leverages Android's native notification system to deliver reliable reminders, ensuring users never miss their medication schedule
 
 ## Key Features
 
